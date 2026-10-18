@@ -22,11 +22,16 @@ export function useRenderer(engine: Engine | null, st: EditState | null, preview
   const busy = useRef(false);
   const pending = useRef<Job | null>(null);
   const current = useRef<Engine | null>(null);
-  /** Последний полный расчёт — чтобы не повторять его после отпускания мыши. */
-  const lastFull = useRef<{ engine: Engine; st: EditState } | null>(null);
+  /** Последний готовый и текущий полные расчёты — чтобы не повторять их после отпускания мыши. */
+  const lastFull = useRef<Job | null>(null);
+  const running = useRef<Job | null>(null);
 
   const enqueue = useCallback((job: Job) => {
-    if (!job.preview && lastFull.current?.engine === job.engine && lastFull.current.st === job.st) return;
+    if (!job.preview && (sameFull(lastFull.current, job) || sameFull(running.current, job))) {
+      // Нужный результат уже есть или вот-вот будет; более старый запрос в очереди не нужен.
+      pending.current = null;
+      return;
+    }
     pending.current = job;
     if (busy.current) return;
     busy.current = true;
@@ -36,14 +41,17 @@ export function useRenderer(engine: Engine | null, st: EditState | null, preview
         while (pending.current) {
           const j = pending.current;
           pending.current = null;
+          running.current = j;
           try {
             const r = await j.engine.render(j.st, j.preview);
             if (j.engine !== current.current) continue;
             setRendered(r);
             setError(null);
-            if (!j.preview) lastFull.current = { engine: j.engine, st: j.st };
+            if (!j.preview) lastFull.current = j;
           } catch (e) {
             if (!(e instanceof EngineCancelled)) setError(`Не удалось построить изображение: ${(e as Error).message}`);
+          } finally {
+            running.current = null;
           }
         }
       } finally {
@@ -76,3 +84,5 @@ export function useRenderer(engine: Engine | null, st: EditState | null, preview
 
   return { rendered, rendering, error, renderFinal };
 }
+
+const sameFull = (a: Job | null, b: Job) => !!a && !a.preview && a.engine === b.engine && a.st === b.st;
