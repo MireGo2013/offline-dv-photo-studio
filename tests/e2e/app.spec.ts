@@ -245,11 +245,16 @@ test('ручная настройка: масштаб, отмена/повтор
   }).toBe(true);
   await page.getByTestId('show-mask').uncheck();
 
-  // Сравнение до/после: левая часть кадра показывает исходный фон (не белый).
+  // Сравнение до/после: слева исходный снимок целиком (820×1024 вписан в 600×600 —
+  // по бокам серые поля шириной ~60 px), у его края виден исходный фон (не белый).
   await page.getByTestId('compare').check();
   await page.mouse.click(box.x + box.width * 0.9, box.y + box.height / 2);
-  const corner = await editor.locator('canvas').evaluate((c: HTMLCanvasElement) => Array.from(c.getContext('2d')!.getImageData(10, 300, 1, 1).data));
-  expect(Math.min(corner[0], corner[1], corner[2])).toBeLessThan(200);
+  const [pad, edge] = await editor.locator('canvas').evaluate((c: HTMLCanvasElement) => {
+    const ctx = c.getContext('2d')!;
+    return [Array.from(ctx.getImageData(10, 300, 1, 1).data), Array.from(ctx.getImageData(75, 300, 1, 1).data)];
+  });
+  expect(pad.slice(0, 3)).toEqual([128, 128, 128]);
+  expect(Math.min(edge[0], edge[1], edge[2])).toBeLessThan(200);
 });
 
 test('снимок обрезан под подбородком: плечи доходят до низа кадра, нормы соблюдены', async ({ page }) => {

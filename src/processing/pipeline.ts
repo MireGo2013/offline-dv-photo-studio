@@ -12,7 +12,7 @@ import { flattenOn, renderCrop, type Source } from './render';
 export const N = DV.exportSize;
 
 export interface Rendered {
-  /** Кадр без замены фона и коррекции (для сравнения «до»). */
+  /** Кадр без замены фона и коррекции (для подсветки маски и баланса белого). */
   before: RGBAImage;
   /** Итог. */
   after: RGBAImage;

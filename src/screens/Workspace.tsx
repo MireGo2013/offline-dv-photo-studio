@@ -65,7 +65,7 @@ export function Workspace({ img, engine, analysis, analysisError, start }: Props
         {analysisError && <div className="alert alert-warn">{analysisError}</div>}
         {renderError && <div className="alert alert-fail">{renderError}</div>}
         <Editor
-          n={N} state={st} rendered={rendered} busy={rendering && !rendered}
+          n={N} state={st} rendered={rendered} original={img.canvas} busy={rendering && !rendered}
           showMask={showMask && tab === 'bg'} tool={tool} brush={brush} showGuides={showGuides} compare={compare}
           onPreview={preview} onCommit={commit} onSet={set}
         />

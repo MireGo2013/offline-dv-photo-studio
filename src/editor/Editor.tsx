@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { RGBAImage } from '../processing/mask';
 import type { Rendered } from '../processing/pipeline';
 import { EditorOverlay } from './EditorOverlay';
@@ -11,6 +11,8 @@ interface Props {
   n: number;
   state: EditState;
   rendered: Rendered | null;
+  /** Исходный снимок: в режиме сравнения «до» показывает его целиком. */
+  original: HTMLCanvasElement;
   /** Подсветить красным то, что уходит в фон (нужна маска). */
   showMask: boolean;
   tool: Tool;
@@ -29,6 +31,7 @@ export function Editor(p: Props) {
   const { n, rendered, compare } = p;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { wrapRef, handlers, stroke, hover, split } = useEditorDrag(p);
+  const original = useMemo(() => fitOriginal(p.original, n), [p.original, n]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
@@ -40,8 +43,8 @@ export function Editor(p: Props) {
     }
     ctx.putImageData(asImageData(after), 0, 0);
     const x = Math.round(split * n);
-    if (compare && x > 0) ctx.putImageData(asImageData(before), 0, 0, 0, 0, x, n);
-  }, [rendered, p.showMask, compare, split, n]);
+    if (compare && x > 0) ctx.putImageData(original, 0, 0, 0, 0, x, n);
+  }, [rendered, original, p.showMask, compare, split, n]);
 
   const cursor = compare ? 'ew-resize' : p.tool === 'move' ? 'grab' : 'none';
   return (
@@ -54,6 +57,22 @@ export function Editor(p: Props) {
       {p.busy && <div className="editor-busy">Обработка…</div>}
     </div>
   );
+}
+
+/** Серые поля вокруг исходника: на белом их не отличить от белого фона. */
+const ORIGINAL_PAD = '#808080';
+
+/** Исходный снимок целиком, вписанный в квадрат N×N по центру. */
+function fitOriginal(src: HTMLCanvasElement, n: number): ImageData {
+  const ctx = new OffscreenCanvas(n, n).getContext('2d', { colorSpace: 'srgb' })!;
+  ctx.fillStyle = ORIGINAL_PAD;
+  ctx.fillRect(0, 0, n, n);
+  const k = Math.min(n / src.width, n / src.height);
+  const w = src.width * k, h = src.height * k;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(src, (n - w) / 2, (n - h) / 2, w, h);
+  return ctx.getImageData(0, 0, n, n);
 }
 
 /** Обёртка без копирования: пиксели приходят из Worker в собственном ArrayBuffer. */
