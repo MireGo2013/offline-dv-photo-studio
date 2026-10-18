@@ -3,7 +3,9 @@ import { formatBytes } from '../lib/checks';
 import { ORIENTATION_LABEL } from '../lib/exif';
 import { KIND_LABEL } from '../lib/fileType';
 import type { LoadedImage } from '../lib/loadImage';
+import { N } from '../lib/pipeline';
 import { SOURCES } from '../lib/requirements';
+import { SourceView } from './SourceView';
 
 export function DropZone({ loading, onPick, onFile }: { loading: boolean; onPick: () => void; onFile: (f: File | undefined) => void }) {
   const [over, setOver] = useState(false);
@@ -59,5 +61,29 @@ export function ImageInfo({ img }: { img: LoadedImage }) {
       <div><dt>Ориентация</dt><dd>{img.hadExif ? `EXIF: ${ORIENTATION_LABEL[img.orientation]}${img.orientation !== 1 ? ' — исправлено' : ''}` : 'без EXIF'}</dd></div>
       {img.downscale > 1 && <div><dt>Рабочая копия</dt><dd>{img.width} × {img.height} (уменьшена для скорости)</dd></div>}
     </dl>
+  );
+}
+
+/** Снимок загружен: сведения о файле и выбор режима обработки. */
+export function LoadedScreen({ img, onBegin }: { img: LoadedImage; onBegin: (mode: 'auto' | 'manual') => void }) {
+  return (
+    <main className="loaded">
+      <div className="card preview-card">
+        <SourceView src={img.canvas} n={N} />
+        <ImageInfo img={img} />
+      </div>
+      <div className="card choose">
+        <h2>Что делаем дальше?</h2>
+        <button className="btn primary big" onClick={() => onBegin('auto')} data-testid="auto-btn">
+          Автоматическая обработка
+          <small>Найдёт лицо, подберёт кадр и заменит фон на белый</small>
+        </button>
+        <button className="btn big" onClick={() => onBegin('manual')} data-testid="manual-btn">
+          Ручная настройка
+          <small>Сами выставите кадр; лицо всё равно будет найдено для проверок</small>
+        </button>
+        <p className="muted">Исходный файл не изменяется — все правки делаются с копией.</p>
+      </div>
+    </main>
   );
 }

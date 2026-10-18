@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { prepareJpeg, saveJpeg, SaveCancelled, verifyJpegBytes, type Prepared, type SaveResult } from '../lib/exportJpeg';
 import type { Rendered } from '../lib/pipeline';
 import type { EditState } from '../lib/state';
@@ -10,6 +10,8 @@ export interface Saved {
   identical: boolean | null;
 }
 
+export type ExportApi = ReturnType<typeof useExport>;
+
 /** Подготовка JPEG из текущего состояния, сохранение и повторная проверка файла с диска. */
 export function useExport(renderFinal: (s: EditState) => Promise<Rendered>, fileName: string | undefined) {
   const [prepared, setPrepared] = useState<(Prepared & { state: EditState }) | null>(null);
@@ -18,12 +20,6 @@ export function useExport(renderFinal: (s: EditState) => Promise<Rendered>, file
   const [saved, setSaved] = useState<Saved | null>(null);
   const [saving, setSaving] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  const reset = useCallback(() => {
-    setPrepared(null);
-    setSaved(null);
-    setError(null);
-  }, []);
 
   const confirm = async (st: EditState) => {
     setPreparing(true);
@@ -62,7 +58,7 @@ export function useExport(renderFinal: (s: EditState) => Promise<Rendered>, file
     }
   };
 
-  return { prepared, preparing, error, saved, saving, ref, reset, confirm, save };
+  return { prepared, preparing, error, saved, saving, ref, confirm, save };
 }
 
 function suggestName(name?: string): string {

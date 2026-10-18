@@ -351,3 +351,32 @@ test('рамку на исходном фото можно двигать и т�
   await page.mouse.up();
   await expect.poll(async () => Number(await zoom.inputValue())).toBeGreaterThan(zoomNow + 1);
 });
+
+test('горячие клавиши в русской раскладке и чистый редактор для нового фото', async ({ page }) => {
+  await page.goto('/');
+  await upload(page, 'portrait.jpg', readFileSync(PORTRAIT));
+  await page.getByTestId('auto-btn').click();
+  await expect(page.getByTestId('metrics')).toBeVisible();
+  const zoom = page.getByTestId('zoom-num');
+  const before = await zoom.inputValue();
+  await zoom.fill('40'); await zoom.press('Enter');
+  await expect(zoom).toHaveValue('40.0');
+
+  // Ctrl+Я в русской раскладке — та же клавиша, что Ctrl+Z: отмена, а не повтор.
+  const press = (key: string, code: string) => page.evaluate(([k, c]) => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: k, code: c, ctrlKey: true, bubbles: true }));
+  }, [key, code]);
+  await press('я', 'KeyZ');
+  await expect(zoom).toHaveValue(before);
+  await press('н', 'KeyY');
+  await expect(zoom).toHaveValue('40.0');
+
+  // Новое фото — редактор с чистого листа: нет истории и включённого сравнения.
+  await page.getByTestId('compare').check();
+  await page.getByTestId('file-input').setInputFiles(PORTRAIT);
+  await page.getByTestId('auto-btn').click();
+  await expect(page.getByTestId('metrics')).toBeVisible();
+  await expect(page.getByTestId('compare')).not.toBeChecked();
+  await expect(page.getByRole('button', { name: /Отменить/ })).toBeDisabled();
+  await expect(zoom).toHaveValue(before);
+});

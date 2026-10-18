@@ -3,9 +3,24 @@ import { formatBytes } from '../lib/checks';
 import type { Prepared } from '../lib/exportJpeg';
 import type { EditState } from '../lib/state';
 import { CheckList, Details, StatusBadge } from './Checks';
-import type { Saved } from './useExport';
+import type { ExportApi, Saved } from './useExport';
 
-export function ExportView({ prepared, stale, saving, onSave, saved }: {
+/** Блок «Сохранение»: готовый JPEG, его проверка и кнопка записи на диск. */
+export function ExportCard({ exp, current }: { exp: ExportApi; current: EditState }) {
+  return (
+    <section className="card export-card" ref={exp.ref} data-testid="export">
+      <h2>Сохранение</h2>
+      {exp.error && <div className="alert alert-fail">{exp.error}</div>}
+      {exp.prepared ? (
+        <ExportView prepared={exp.prepared} stale={exp.prepared.state !== current} saving={exp.saving} onSave={exp.save} saved={exp.saved} />
+      ) : (
+        <p className="muted">Нажмите «Подтвердить результат», чтобы подготовить JPEG и проверить файл.</p>
+      )}
+    </section>
+  );
+}
+
+function ExportView({ prepared, stale, saving, onSave, saved }: {
   prepared: Prepared & { state: EditState }; stale: boolean; saving: boolean; onSave: () => void; saved: Saved | null;
 }) {
   const url = useMemo(() => URL.createObjectURL(new Blob([prepared.encode.bytes as BlobPart], { type: 'image/jpeg' })), [prepared]);

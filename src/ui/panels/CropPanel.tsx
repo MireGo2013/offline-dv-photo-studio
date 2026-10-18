@@ -8,9 +8,9 @@ import type { PanelProps } from './types';
 
 export function CropPanel(p: PanelProps & {
   img: LoadedImage; analysis: FaceAnalysis | null; showGuides: boolean; setShowGuides: (v: boolean) => void;
-  setCrop: (fn: (c: Crop) => Crop) => void;
 }) {
   const { st, img } = p;
+  const setCrop = (fn: (c: Crop) => Crop) => p.update((s) => ({ ...s, crop: fn(s.crop) }));
   const lm = st.landmarks;
   const { min: minSize, max: maxSize } = cropSizeLimits(img.width, img.height);
   const zoomVal = (Math.log(maxSize / st.crop.size) / Math.log(maxSize / minSize)) * 100;
@@ -28,9 +28,9 @@ export function CropPanel(p: PanelProps & {
         onCommit={p.commit} decimals={2} unit="°" testId="angle"
       />
       <div className="btn-row">
-        <button className="btn" disabled={!lm} onClick={() => lm && p.setCrop(() => autoCrop(lm, img.width, img.height, { bgReplaced: st.bg.replace }))} data-testid="autocrop">Авто-кадр</button>
-        <button className="btn" disabled={!lm} onClick={() => lm && p.setCrop((c) => centerFace(c, lm, N))}>Центрировать лицо</button>
-        <button className="btn" disabled={!lm} onClick={() => lm && p.setCrop((c) => rotateCrop(c, eyeLineAngle(lm)))}>Выровнять по глазам</button>
+        <button className="btn" disabled={!lm} onClick={() => lm && setCrop(() => autoCrop(lm, img.width, img.height, { bgReplaced: st.bg.replace }))} data-testid="autocrop">Авто-кадр</button>
+        <button className="btn" disabled={!lm} onClick={() => lm && setCrop((c) => centerFace(c, lm, N))}>Центрировать лицо</button>
+        <button className="btn" disabled={!lm} onClick={() => lm && setCrop((c) => rotateCrop(c, eyeLineAngle(lm)))}>Выровнять по глазам</button>
       </div>
       <label className="toggle">
         <input type="checkbox" checked={p.showGuides} onChange={(e) => p.setShowGuides(e.target.checked)} />
