@@ -1,5 +1,5 @@
 {
-  "name": "dv-photo-local",
+  "name": "offline-dv-photo-studio",
   "private": true,
   "version": "1.0.0",
   "description": "Личное локальное приложение для подготовки фотографии на DV Lottery. Работает офлайн, фото не покидает компьютер.",
