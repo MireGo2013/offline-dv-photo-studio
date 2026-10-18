@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { encodeWithinLimits, MIN_QUALITY } from '../../src/lib/encode';
-import { DV, minBytesForSize } from '../../src/lib/requirements';
-import { validateExportFile } from '../../src/lib/validateFile';
+import { DV, minBytesForSize } from '../../src/checks/requirements';
+import { encodeWithinLimits, MIN_QUALITY } from '../../src/export/encode';
+import { validateExportFile } from '../../src/export/validateFile';
 import { gradient, iccSegment, insertSegments, makeJpeg, noise, texture } from '../helpers/images';
 
 const status = (r: ReturnType<typeof validateExportFile>, id: string) => r.checks.find((c) => c.id === id)?.status;

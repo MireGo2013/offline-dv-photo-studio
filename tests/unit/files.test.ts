@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { parseJpeg, JpegParseError } from '../../src/export/jpegInfo';
 import {
   orientationTransform, readTiffOrientation, stripJpegExif, stripOrientation, stripPngExif, stripWebpExif,
   type Orientation,
-} from '../../src/lib/exif';
-import { sniffImageType } from '../../src/lib/fileType';
-import { parseJpeg, JpegParseError } from '../../src/lib/jpegInfo';
+} from '../../src/photo/exif';
+import { sniffImageType } from '../../src/photo/fileType';
 import { decodeJpeg, exifSegment, gradient, iccSegment, insertSegments, makeJpeg, tiffWithOrientation } from '../helpers/images';
 
 const applyMatrix = (m: number[], x: number, y: number): [number, number] => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];

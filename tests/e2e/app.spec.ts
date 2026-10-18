@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { parseJpeg } from '../../src/lib/jpegInfo';
-import { validateExportFile } from '../../src/lib/validateFile';
+import { parseJpeg } from '../../src/export/jpegInfo';
+import { validateExportFile } from '../../src/export/validateFile';
 import { decodeJpeg, exifSegment, insertSegments, makeJpeg } from '../helpers/images';
 
 const PORTRAIT = 'tests/fixtures/portrait.jpg';

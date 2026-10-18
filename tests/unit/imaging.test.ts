@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { applyAdjustments, estimateWhiteBalance, NO_ADJUSTMENTS } from '../../src/lib/adjust';
-import { hasColor, laplacianVariance, regionStats } from '../../src/lib/analysis';
-import { composeChecks } from '../../src/lib/compose';
-import { applyStrokes, boxMean, compositeOnColor, estimateEdgeColors, guidedFilterColor, adjustAlpha, normalizeMask, type RGBAImage } from '../../src/lib/mask';
-import { contextCrop, mergeShoulderMask, resizeMask, warpMask } from '../../src/lib/pipeline';
-import { parseNumber } from '../../src/ui/Slider';
-import { toOutput, toSource } from '../../src/lib/geometry';
-import { initialState } from '../../src/lib/state';
+import { hasColor, laplacianVariance, regionStats } from '../../src/checks/analysis';
+import { composeChecks } from '../../src/checks/compose';
+import { initialState } from '../../src/editor/state';
+import { applyAdjustments, estimateWhiteBalance, NO_ADJUSTMENTS } from '../../src/processing/adjust';
+import { applyStrokes, boxMean, compositeOnColor, estimateEdgeColors, guidedFilterColor, adjustAlpha, normalizeMask, type RGBAImage } from '../../src/processing/mask';
+import { contextCrop, mergeShoulderMask, resizeMask, warpMask } from '../../src/processing/pipeline';
+import { parseNumber } from '../../src/shared/Slider';
+import { toOutput, toSource } from '../../src/shared/geometry';
 
 function image(w: number, h: number, f: (x: number, y: number) => [number, number, number]): RGBAImage {
   const data = new Uint8ClampedArray(w * h * 4);

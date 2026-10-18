@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { DV } from '../../src/checks/requirements';
 import {
   autoCrop, centerFace, cropMatrix, cropSizeLimits, defaultCrop, measure, outsideParts, panCrop, resizeCrop, toOutput, toSource, zoomCrop,
   type Crop, type Landmarks,
-} from '../../src/lib/geometry';
-import { DV } from '../../src/lib/requirements';
+} from '../../src/shared/geometry';
 
 const outsideFraction = (c: Crop, w: number, h: number) => {
   const o = outsideParts(c, w, h);

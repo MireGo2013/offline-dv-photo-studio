@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { initHistory, previewStep, redoStep, setStep, settle, undoStep } from '../../src/ui/useHistory';
+import { initHistory, previewStep, redoStep, setStep, settle, undoStep } from '../../src/editor/useHistory';
 
 describe('история правок', () => {
   it('перетаскивание — один шаг истории', () => {
