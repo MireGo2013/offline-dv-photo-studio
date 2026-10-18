@@ -7,6 +7,9 @@ import { useEditorDrag, type Tool } from './useEditorDrag';
 
 export type { Tool };
 
+/** С чем сравнивать результат: исходный снимок целиком или тот же кадр без обработки. */
+export type CompareWith = 'original' | 'frame';
+
 interface Props {
   n: number;
   state: EditState;
@@ -20,6 +23,8 @@ interface Props {
   brush: number;
   showGuides: boolean;
   compare: boolean;
+  compareWith: CompareWith;
+  onCompareWith: (v: CompareWith) => void;
   busy: boolean;
   onPreview: (fn: (s: EditState) => EditState) => void;
   onCommit: () => void;
@@ -43,8 +48,8 @@ export function Editor(p: Props) {
     }
     ctx.putImageData(asImageData(after), 0, 0);
     const x = Math.round(split * n);
-    if (compare && x > 0) ctx.putImageData(original, 0, 0, 0, 0, x, n);
-  }, [rendered, original, p.showMask, compare, split, n]);
+    if (compare && x > 0) ctx.putImageData(p.compareWith === 'original' ? original : asImageData(before), 0, 0, 0, 0, x, n);
+  }, [rendered, original, p.showMask, compare, p.compareWith, split, n]);
 
   const cursor = compare ? 'ew-resize' : p.tool === 'move' ? 'grab' : 'none';
   return (
@@ -54,6 +59,13 @@ export function Editor(p: Props) {
         n={n} state={p.state} showGuides={p.showGuides} compare={compare}
         split={split} stroke={stroke} hover={hover} tool={p.tool} brush={p.brush}
       />
+      {compare && (
+        // Внутри кадра, чтобы при включении сравнения ничего не сдвигалось; нажатие не должно двигать разделитель.
+        <div className="seg compare-switch" onPointerDown={(e) => e.stopPropagation()} title="«Кадр» — тот же кадр без обработки: удобно проверять края маски">
+          <button className={p.compareWith === 'original' ? 'on' : ''} onClick={() => p.onCompareWith('original')} data-testid="compare-original">Оригинал</button>
+          <button className={p.compareWith === 'frame' ? 'on' : ''} onClick={() => p.onCompareWith('frame')} data-testid="compare-frame">Кадр</button>
+        </div>
+      )}
       {p.busy && <div className="editor-busy">Обработка…</div>}
     </div>
   );

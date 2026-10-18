@@ -3,7 +3,7 @@ import { ChecksCard } from '../checks/ChecksCard';
 import { Metric } from '../checks/Metric';
 import { composeChecks } from '../checks/compose';
 import { DV } from '../checks/requirements';
-import { Editor, type Tool } from '../editor/Editor';
+import { Editor, type CompareWith, type Tool } from '../editor/Editor';
 import { SourceView } from '../editor/SourceView';
 import { BgPanel } from '../editor/panels/BgPanel';
 import { ColorPanel } from '../editor/panels/ColorPanel';
@@ -40,6 +40,7 @@ export function Workspace({ img, engine, analysis, analysisError, start }: Props
   const [brush, setBrush] = useState(14);
   const [showGuides, setShowGuides] = useState(true);
   const [compare, setCompare] = useState(false);
+  const [compareWith, setCompareWith] = useState<CompareWith>('original');
   const [showMask, setShowMask] = useState(false);
   useUndoKeys(undo, redo);
 
@@ -66,7 +67,7 @@ export function Workspace({ img, engine, analysis, analysisError, start }: Props
         {renderError && <div className="alert alert-fail">{renderError}</div>}
         <Editor
           n={N} state={st} rendered={rendered} original={img.canvas} busy={rendering && !rendered}
-          showMask={showMask && tab === 'bg'} tool={tool} brush={brush} showGuides={showGuides} compare={compare}
+          showMask={showMask && tab === 'bg'} tool={tool} brush={brush} showGuides={showGuides} compare={compare} compareWith={compareWith} onCompareWith={setCompareWith}
           onPreview={preview} onCommit={commit} onSet={set}
         />
         {composition.metrics && (

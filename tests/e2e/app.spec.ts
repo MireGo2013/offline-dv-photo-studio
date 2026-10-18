@@ -255,6 +255,13 @@ test('ручная настройка: масштаб, отмена/повтор
   });
   expect(pad.slice(0, 3)).toEqual([128, 128, 128]);
   expect(Math.min(edge[0], edge[1], edge[2])).toBeLessThan(200);
+
+  // Режим «Кадр»: слева тот же кадр без обработки — у левого края исходный фон, серых полей нет.
+  await page.getByTestId('compare-frame').click();
+  await expect.poll(async () => {
+    const px = await editor.locator('canvas').evaluate((c: HTMLCanvasElement) => Array.from(c.getContext('2d')!.getImageData(10, 300, 1, 1).data));
+    return Math.min(px[0], px[1], px[2]) < 200 && !(px[0] === 128 && px[1] === 128 && px[2] === 128);
+  }).toBe(true);
 });
 
 test('снимок обрезан под подбородком: плечи доходят до низа кадра, нормы соблюдены', async ({ page }) => {
